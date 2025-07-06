@@ -1,9 +1,9 @@
-import type { MoviesResponse, MovieDetail, GenreMovieListResponse, APIError ,GenreListResponse} from '@/types/movie';
+import type { MoviesResponse, MovieDetail, GenreMovieListResponse, APIError, GenreListResponse } from '@/types/movie';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 if (!import.meta.env.VITE_API_BASE_URL) {
-  console.warn('VITE_API_BASE_URLが環境変数に設定されていません。デフォルト値を使用します: http://localhost:8080');
+  console.warn('VITE_API_BASE_URLが環境変数に設定されていません。デフォルト値を使用します:', API_BASE_URL);
 }
 
 const request = async <T>(

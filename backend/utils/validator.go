@@ -21,7 +21,7 @@ func (e *ValidationError) Error() string {
 const (
 	MaxPageValue       = 1000  // ページ番号の上限
 	MaxLimitValue      = 100   // 1ページあたりの件数上限
-	MaxMovieID         = 999999 // 映画IDの上限
+	MaxMovieID         = 9999999 // 映画IDの上限
 	MaxGenreID         = 999    // ジャンルIDの上限
 	MaxSearchQueryLen  = 100    // 検索クエリの最大文字数
 	MinSearchQueryLen  = 1      // 検索クエリの最小文字数

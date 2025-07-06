@@ -8,6 +8,9 @@ backend/logs/
 
 # 環境設定ファイル
 backend/.env
+frontend/.env
+backend/.env.production
+frontend/.env.production
 
 # OS固有ファイル
 .DS_Store
@@ -28,3 +31,6 @@ Thumbs.db
 
 # テスト関連
 coverage.*
+
+# 環境変数
+.env

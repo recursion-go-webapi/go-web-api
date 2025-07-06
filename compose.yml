@@ -1,0 +1,45 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend_logs:/root/logs
+    networks:
+      - app-network
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      - GO_ENV=${GO_ENV:-development}
+      - PORT=${PORT:-8080}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3003}
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3003:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+    env_file:
+      - ./frontend/.env
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8080}
+      - VITE_APP_TITLE=${VITE_APP_TITLE:-Go Movie Explorer}
+      - VITE_DEBUG=${VITE_DEBUG:-true}
+      - VITE_APP_ENV=${VITE_APP_ENV:-development}
+
+volumes:
+  backend_logs:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
