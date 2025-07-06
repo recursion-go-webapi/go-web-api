@@ -37,6 +37,7 @@ func DefaultSecurityConfig() *SecurityConfig {
 		// CORS設定
 		AllowedOrigins: []string{
 			frontendURL,
+			"http://localhost:8081", // Swagger UIのCORS対応
 		},
 		AllowedMethods: []string{
 			"GET", "POST", "PUT", "DELETE", "OPTIONS",

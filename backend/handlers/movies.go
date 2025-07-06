@@ -57,7 +57,7 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 // 映画詳細取得ハンドラー /api/movies/{id}
 func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json")
-	prefix := "/api/movie/"
+	prefix := "/api/movies/"
 	if !strings.HasPrefix(r.URL.Path, prefix) {
 		return middleware.NewBadRequestError(fmt.Sprintf("無効なパス: %s", r.URL.Path))
 	}

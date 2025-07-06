@@ -1,0 +1,416 @@
+openapi: 3.0.0
+info:
+  title: Movie Explorer API
+  version: "1.0"
+  description: |
+    映画情報を取得するためのAPIです。エンドポイントごとに返却されるJSONの例やパラメータを記載しています。
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /healthz:
+    get:
+      summary: ヘルスチェック
+      responses:
+        '200':
+          description: APIが正常に稼働していることを確認
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uptime:
+                    type: integer
+                    example: 36747
+                  version:
+                    type: string
+                    example: ""
+                  status:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    example:
+                      TMDB: "OK"
+        '500':
+          description: サーバーに問題が発生
+  /api/movies:
+    get:
+      summary: 映画一覧を取得
+      parameters:
+        - name: page
+          in: query
+          description: ページ番号（1から始まる整数）
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+      responses:
+        '200':
+          description: 映画一覧の取得に成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieListResponse'
+              example:
+                page: 1
+                total_pages: 51163
+                total_results: 1023242
+                results:   # ←resultsに
+                  - id: 574475
+                    title: Final Destination Bloodlines
+                    overview: Plagued by a violent recurring nightmare, college student Stefanie heads home...
+                    release_date: "2025-05-14"
+                    poster_path: "/6WxhEvFsauuACfv8HyoVX6mZKFj.jpg"
+                    vote_average: 7.2
+                    popularity: 617.5712
+                  - id: 552524
+                    title: Lilo & Stitch
+                    overview: The wildly funny and touching story of a lonely Hawaiian girl and the fugitive alien who helps to mend her broken family.
+                    release_date: "2025-05-17"
+                    poster_path: "/7c5VBuCbjZOk7lSfj9sMpmDIaKX.jpg"
+                    vote_average: 7.1
+                    popularity: 405.8029
+        '400':
+          description: 不正なリクエスト
+  /api/movies/genre:
+    get:
+      summary: 映画ジャンルの一覧を取得
+      description: TMDBのジャンルAPIを利用し、映画ジャンルの一覧を取得する
+      parameters:
+        - name: genre_id
+          in: query
+          description: 特定のジャンルIDでフィルタリングする
+          required: true
+          schema:
+            type: integer
+            example: 28
+      responses:
+        '200':
+          description: ジャンル一覧の取得に成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  genres:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Genre'
+              example:
+                genre_id: 28
+                page: 1
+                per_page: 20
+                total_pages: 2225
+                total_results: 44495
+                results: 
+                  - id: 28
+                    title: Action
+                    overview: Action movies are characterized by fast-paced sequences, physical feats, and high-energy
+                    release_date: "2025-05-14"
+                    poster_path: "/6WxhEvFsauuACfv8HyoVX6mZKFj.jpg"
+                    vote_average: 7.2
+                    popularity: 617.5712
+                    vote_count: 517
+  /api/movies/{id}:
+    get:
+      summary: 特定の映画情報を取得
+      parameters:
+        - name: id
+          in: path
+          description: 映画のID
+          required: true
+          schema:
+            type: integer
+            example: 574475
+      responses:
+        '200':
+          description: 映画情報の取得に成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieDetail'
+              example:
+                id: 574475
+                title: Final Destination Bloodlines
+                original_title: Final Destination Bloodlines
+                overview: Plagued by a violent recurring nightmare...
+                release_date: "2025-05-14"
+                poster_path: "/6WxhEvFsauuACfv8HyoVX6mZKFj.jpg"
+                backdrop_path: "/backdrop.jpg"
+                genres:
+                  - id: 28
+                    name: Action
+                homepage: "https://www.finaldestination.com"
+                imdb_id: "tt1234567"
+                popularity: 617.5712
+                budget: 100000000
+                origin_country: ["US"]
+                original_language: "en"
+        '404':
+          description: 映画が見つからない
+
+  /api/movies/search:
+    get:
+      summary: 映画を検索する
+      description: TMDBの検索APIを利用し、キーワードとページ番号で映画を検索する
+      parameters:
+        - name: query
+          in: query
+          description: 検索キーワード（映画タイトル等）
+          required: true
+          schema:
+            type: string
+            example: "batman"
+        - name: page
+          in: query
+          description: ページ番号（1以上、デフォルト1）
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+      responses:
+        '200':
+          description: 映画リスト
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieListWithoutGenreResponse'
+        '400':
+          description: パラメータ不正（例 キーワード未指定など）
+  # /movies/popular:
+  #   get:
+  #     summary: 人気映画ランキングの取得
+  #     description: TMDBの人気映画ランキング（「/movie/popular」）を取得するエンドポイント。
+  #     parameters:
+  #       - name: page
+  #         in: query
+  #         description: 取得するページ番号（省略時は1）
+  #         required: false
+  #         schema:
+  #           type: integer
+  #           minimum: 1
+  #           default: 1
+  #     responses:
+  #       '200':
+  #         description: 人気映画リストの取得に成功
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 page:
+  #                   type: integer
+  #                 total_results:
+  #                   type: integer
+  #                 total_pages:
+  #                   type: integer
+  #                 results:
+  #                   type: array
+  #                   items:
+  #                     type: object
+  #                     properties:
+  #                       id:
+  #                         type: integer
+  #                       title:
+  #                         type: string
+  #                       overview:
+  #                         type: string
+  #                       poster_path:
+  #                         type: string
+  #                         nullable: true
+  #                       release_date:
+  #                         type: string
+  #                         format: date
+  #                       vote_average:
+  #                         type: number
+  #                         format: float
+  #                       vote_count:
+  #                         type: integer
+  #       '400':
+  #         description: クライアントからのリクエストが不正
+  
+
+components:
+  schemas:
+    MovieListResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        total_pages:
+          type: integer
+          example: 51163
+        total_results:
+          type: integer
+          example: 1023242
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Movie'
+    MovieListWithoutGenreResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        total_pages:
+          type: integer
+          example: 51163
+        total_results:
+          type: integer
+          example: 1023242
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MovieWithoutGenre'
+    MovieGenreListResponse:
+      type: object
+      properties:
+        genre_id:
+          type: integer
+          example: 28
+        page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 20
+        total_pages:
+          type: integer
+          example: 2225
+        total_results:
+          type: integer
+          example: 44495
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Movie'
+    Movie:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 574475
+        title:
+          type: string
+          example: Final Destination Bloodlines
+        overview:
+          type: string
+          example: Plagued by a violent recurring nightmare, college student Stefanie heads home...
+        release_date:
+          type: string
+          format: date
+          example: "2025-05-14"
+        genre_ids:
+          type: array
+          items:
+            type: integer
+          example: [28, 53, 80]
+        poster_path:
+          type: string
+          example: "/6WxhEvFsauuACfv8HyoVX6mZKFj.jpg"
+        vote_average:
+          type: number
+          format: float
+          example: 7.2
+        popularity:
+          type: number
+          format: float
+          example: 617.5712
+        vote_count:
+          type: integer
+          example: 517
+    MovieWithoutGenre:
+      description: ジャンル情報を含まない映画オブジェクト
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 574475
+        title:
+          type: string
+          example: Final Destination Bloodlines
+        overview:
+          type: string
+          example: Plagued by a violent recurring nightmare, college student Stefanie heads home...
+        release_date:
+          type: string
+          format: date
+          example: "2025-05-14"
+        poster_path:
+          type: string
+          example: "/6WxhEvFsauuACfv8HyoVX6mZKFj.jpg"
+        vote_average:
+          type: number
+          format: float
+          example: 7.2
+        popularity:
+          type: number
+          format: float
+          example: 617.5712
+        vote_count:
+          type: integer
+          example: 517
+    Genre:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 28
+        name:
+          type: string
+          example: Action
+    MovieDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 574475
+        title:
+          type: string
+          example: Final Destination Bloodlines
+        original_title:
+          type: string
+          example: Final Destination Bloodlines
+        overview:
+          type: string
+          example: Plagued by a violent recurring nightmare...
+        release_date:
+          type: string
+          format: date
+          example: "2025-05-14"
+        poster_path:
+          type: string
+          example: "/6WxhEvFsauuACfv8HyoVX6mZKFj.jpg"
+        backdrop_path:
+          type: string
+          example: "/backdrop.jpg"
+        genres:
+          type: array
+          items:
+            $ref: '#/components/schemas/Genre'
+        homepage:
+          type: string
+          example: "https://www.finaldestination.com"
+        imdb_id:
+          type: string
+          example: "tt1234567"
+        popularity:
+          type: number
+          format: float
+          example: 617.5712
+        budget:
+          type: integer
+          example: 100000000
+        origin_country:
+          type: array
+          items:
+            type: string
+          example: ["US"]
+        original_language:
+          type: string
+          example: "en"

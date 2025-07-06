@@ -68,7 +68,7 @@ func main() {
 	mux.HandleFunc("/api/movies/genre", middleware.LoggingHandler(handlers.ListMoviesByGenreHandler))
 
 	// - /api/movies/{id} : 映画詳細取得APIエンドポイント
-	mux.HandleFunc("/api/movie/", middleware.LoggingHandler(handlers.MovieDetailHandler))
+	mux.HandleFunc("/api/movies/", middleware.LoggingHandler(handlers.MovieDetailHandler))
 
 	// - /api/movies/search：映画検索APIエンドポイント
 	mux.HandleFunc("/api/movies/search", middleware.LoggingHandler(handlers.SearchMoviesHandler))
