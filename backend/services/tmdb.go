@@ -65,13 +65,12 @@ func (t *TmdbPinger) Ping(ctx context.Context) error {
 	if apiKey == "" {
 		return fmt.Errorf("TMDB_API_KEYが設定されていません")
 	}
-	url := fmt.Sprintf("%s/discover/movie?page=1&api_key=%s", BaseURL, apiKey)
-	// url := BaseURL + "/discover/movie?page=1"
+	url := BaseURL + "/discover/movie?page=1"
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return fmt.Errorf("TMDB Pingリクエスト作成失敗: %w", err)
 	}
-	// req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Authorization", "Bearer "+apiKey)
 	req.Header.Set("Accept", "application/json")
 	client := getPingHTTPClient()
 	resp, err := client.Do(req)
@@ -226,41 +225,6 @@ func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error
 // 	// 例: /movie/popular?page=...
 // 	return nil, nil
 // }
-
-func GetPopularMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
-	apiToken := os.Getenv("TMDB_API_KEY") // 今はトークンをここに入れるとする
-	if apiToken == "" {
-		return nil, fmt.Errorf("TMDB_API_KEYが設定されていません")
-	}
-
-	url := fmt.Sprintf("%s/movie/popular?page=%d", BaseURL, page)
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("リクエスト作成失敗: %w", err)
-	}
-
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiToken)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("TMDB APIリクエスト失敗: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("TMDB APIエラー: status=%d", resp.StatusCode)
-	}
-
-	var tmdbResp models.MoviesResponse
-	if err := json.NewDecoder(resp.Body).Decode(&tmdbResp); err != nil {
-		return nil, fmt.Errorf("レスポンスデコード失敗: %w", err)
-	}
-
-	return &tmdbResp, nil
-}
 
 // --- ジャンル別映画取得（/discover/movie?with_genres=）---
 func GetMoviesByGenreFromTMDB(genreID, page int) (*models.GenreMovieListResponse, error) {

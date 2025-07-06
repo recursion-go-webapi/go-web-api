@@ -81,7 +81,8 @@ func main() {
 	securedHandler := middleware.SecurityMiddleware(securityConfig)(mux)
 
 	// - /api/movies/popular : 人気映画ランキング（今後追加予定）
-	mux.HandleFunc("/api/movies/popular", middleware.LoggingHandler(handlers.PopularMoviesHandler))
+	//
+	// 新しいエンドポイントを追加する場合は、ここにルーティングを追記してください。
 
 	log.Printf("Server starting on http://localhost%s\n", port)
 	log.Printf("Server listening on port %s", port)

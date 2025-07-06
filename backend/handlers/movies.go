@@ -19,7 +19,7 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	// クエリパラメータ取得とバリデーション
 	pageStr := r.URL.Query().Get("page")
 	limitStr := r.URL.Query().Get("limit")
-
+	
 	// ページ番号のバリデーション
 	page, err := utils.ValidatePage(pageStr)
 	if err != nil {
@@ -28,6 +28,7 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 		}
 		return middleware.NewInternalServerError(fmt.Sprintf("ページ番号の検証中にエラーが発生しました: %v", err))
 	}
+	
 	// 件数制限のバリデーション
 	limit, err := utils.ValidateLimit(limitStr)
 	if err != nil {
@@ -37,9 +38,6 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 		return middleware.NewInternalServerError(fmt.Sprintf("件数制限の検証中にエラーが発生しました: %v", err))
 	}
 	
-	// 現在はlimitは使用していないが、将来的に使用する予定
-	_ = limit
-
 	// 現在はlimitは使用していないが、将来的に使用する予定
 	_ = limit
 
@@ -64,7 +62,7 @@ func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 		return middleware.NewBadRequestError(fmt.Sprintf("無効なパス: %s", r.URL.Path))
 	}
 	id := strings.TrimPrefix(r.URL.Path, prefix)
-  
+	
 	// 映画IDのバリデーション
 	movieID, err := utils.ValidateMovieID(id)
 	if err != nil {
@@ -94,7 +92,7 @@ func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 
 	// クエリパラメータ取得とバリデーション
 	query := r.URL.Query().Get("query")
-
+	
 	// 検索クエリのバリデーション
 	if err := utils.ValidateSearchQuery(query); err != nil {
 		if utils.IsValidationError(err) {
@@ -127,30 +125,9 @@ func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// 人気映画ランキング /api/movies/popular
-func PopularMoviesHandler(w http.ResponseWriter, r *http.Request) error {
-	w.Header().Set("Content-Type", "application/json")
-
-	// クエリパラメータ取得
-	page := 1
-	pageStr := r.URL.Query().Get("page")
-	if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
-		page = p
-	}
-
-	// サービス呼び出し
-	resp, err := services.GetPopularMoviesFromTMDB(page)
-	if err != nil {
-		return middleware.NewInternalServerError(fmt.Sprintf("TMDB API 呼び出し失敗: %v", err))
-	}
-
-	// レスポンス返却
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		return middleware.NewInternalServerError(fmt.Sprintf("JSON エンコード失敗: %v", err))
-	}
-
-	return nil
-}
+// - /api/movies/popular : 人気映画ランキング（今後追加予定）
+//
+// 新しいエンドポイントを追加する場合は、このファイルにハンドラー関数を追記してください。
 
 func ListMoviesByGenreHandler(w http.ResponseWriter, r *http.Request) error {
 	genreIDStr := r.URL.Query().Get("genre_id")
